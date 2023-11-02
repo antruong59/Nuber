@@ -20,5 +20,9 @@ public abstract class Person
 		
 		return SAMPLE_NAMES[nextNameIndex];
 	}
+	
+	public String toString() {
+		return "name = " + name + ", maxSleep = " + maxSleep;
+	}
 
 }

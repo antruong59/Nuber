@@ -1,6 +1,7 @@
 package nuber.students;
 
 import java.util.HashMap;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 
 /**
@@ -17,6 +18,7 @@ public class NuberDispatch {
 	private final int MAX_DRIVERS = 999;
 	
 	private boolean logEvents = false;
+	private BlockingQueue<Driver> idleDriversQueue;
 	
 	/**
 	 * Creates a new dispatch objects and instantiates the required regions and any other objects required.
@@ -27,6 +29,9 @@ public class NuberDispatch {
 	 */
 	public NuberDispatch(HashMap<String, Integer> regionInfo, boolean logEvents)
 	{
+		this.logEvents = logEvents;
+//		idleDriversQueue = new 
+		
 	}
 	
 	/**
@@ -39,6 +44,16 @@ public class NuberDispatch {
 	 */
 	public boolean addDriver(Driver newDriver)
 	{
+		// Add driver into queue and wait till available
+		
+		try {
+			idleDriversQueue.put(newDriver); 
+			return true;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
 	/**
@@ -50,6 +65,16 @@ public class NuberDispatch {
 	 */
 	public Driver getDriver()
 	{
+		// Retrieves and removes the head of driver  queue, 
+		// wait for available spot if needed
+		
+		try {
+			return idleDriversQueue.take(); 
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	/**
