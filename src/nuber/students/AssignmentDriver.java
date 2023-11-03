@@ -35,41 +35,43 @@ public class AssignmentDriver {
 			e.printStackTrace();
 		}
 		
-//		//test creating a dispatch object
-//		NuberDispatch dispatch = new NuberDispatch(testRegions, logEvents);
-//		
-//		//create two new bookings
-//		Booking b1 = new Booking(dispatch, testPassenger);
-//		Booking b2 = new Booking(dispatch, testPassenger);
-//		
-//		//test creating a new region
-//		NuberRegion region = new NuberRegion(dispatch, "Test Region", 10);
-//
-//		//test adding a driver to dispatch
-//		dispatch.addDriver(testDriver);
-//		
-//		//test booking a single passenger
-//		dispatch.bookPassenger(testPassenger, "Test Region");
-//
-//		//shutdown the dispatch when it's done
-//		dispatch.shutdown();
-//
-//		
-//		
-//		
-//		
-//		//create NuberDispatch for given regions and max simultaneous jobs per region
-//		//once you have the above running, you should be able to uncomment the Simulations below to start to put everything together
-//		
-//		HashMap<String, Integer> regions = new HashMap<String, Integer>();
-//		regions.put("North", 50);
-//		regions.put("South", 50);
-//		
-//		//new Simulation(regions, 1, 10, 1000, logEvents);
-//		//new Simulation(regions, 5, 10, 1000, logEvents);
-//		//new Simulation(regions, 10, 10, 1000, logEvents);
-//		//new Simulation(regions, 10, 100, 1000, logEvents);
-//		//new Simulation(regions, 1, 50, 1000, logEvents);
+		//test creating a dispatch object
+		NuberDispatch dispatch = new NuberDispatch(testRegions, logEvents);
+		
+		//create two new bookings
+		Booking b1 = new Booking(dispatch, testPassenger);
+		Booking b2 = new Booking(dispatch, testPassenger);
+		
+		//test creating a new region
+		NuberRegion region = new NuberRegion(dispatch, "Test Region", 10);
+
+		//test adding a driver to dispatch
+		dispatch.addDriver(testDriver);
+		
+		dispatch.getDriver();
+		
+		//test booking a single passenger
+		dispatch.bookPassenger(testPassenger, "Test Region");
+
+		//shutdown the dispatch when it's done
+		dispatch.shutdown();
+
+		
+		
+		
+		
+		//create NuberDispatch for given regions and max simultaneous jobs per region
+		//once you have the above running, you should be able to uncomment the Simulations below to start to put everything together
+		
+		HashMap<String, Integer> regions = new HashMap<String, Integer>();
+		regions.put("North", 50);
+		regions.put("South", 50);
+		
+		new Simulation(regions, 1, 10, 1000, logEvents);
+		new Simulation(regions, 5, 10, 1000, logEvents);
+		new Simulation(regions, 10, 10, 1000, logEvents);
+		new Simulation(regions, 10, 100, 1000, logEvents);
+		new Simulation(regions, 1, 50, 1000, logEvents);
 	}
 
 }

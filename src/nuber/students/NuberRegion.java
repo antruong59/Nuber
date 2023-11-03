@@ -1,5 +1,7 @@
 package nuber.students;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -17,7 +19,9 @@ import java.util.concurrent.Future;
  *
  */
 public class NuberRegion {
-
+	private NuberDispatch dispatch;
+	private String regionName;
+	private ExecutorService executorService; // Allow running multiple thread ie multiple simultaneous bookings asynchronously
 	
 	/**
 	 * Creates a new Nuber region
@@ -28,7 +32,10 @@ public class NuberRegion {
 	 */
 	public NuberRegion(NuberDispatch dispatch, String regionName, int maxSimultaneousJobs)
 	{
-		
+		this.dispatch = dispatch;
+		this.regionName = regionName;
+		executorService = Executors.newFixedThreadPool(maxSimultaneousJobs); // Create pool and threads and assign tasks
+		System.out.println("\nNew Nuber Region --> " + regionName);
 
 	}
 	
@@ -44,8 +51,17 @@ public class NuberRegion {
 	 * @return a Future that will provide the final BookingResult object from the completed booking
 	 */
 	public Future<BookingResult> bookPassenger(Passenger waitingPassenger)
-	{		
+	{	
+		Booking booking =  new Booking(dispatch, waitingPassenger);
+		if (!executorService.isShutdown()) {	
+			dispatch.logEvent(booking, "Logging new booking...");
+			return executorService.submit(booking);
+		}
+		dispatch.logEvent(booking, "Rejected booking");
+		Booking.currentID --;
 		
+		return null;
+		// Future => retrieve the result of a booking running in the background without blocking the main one
 	}
 	
 	/**
@@ -53,6 +69,7 @@ public class NuberRegion {
 	 */
 	public void shutdown()
 	{
+		executorService.shutdown();
 	}
 		
 }

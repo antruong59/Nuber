@@ -1,5 +1,7 @@
 package nuber.students;
 
+import java.util.concurrent.Callable;
+
 /**
  * 
  * Booking represents the overall "job" for a passenger getting to their destination.
@@ -18,8 +20,12 @@ package nuber.students;
  * @author james
  *
  */
-public class Booking {
-
+public class Booking implements Callable<BookingResult> {
+	private NuberDispatch dispatch;
+	private Passenger passenger;
+	private BookingResult bookingResult;
+	public static int currentID = 0;
+	private int bookingID;
 		
 	/**
 	 * Creates a new booking for a given Nuber dispatch and passenger, noting that no
@@ -29,9 +35,13 @@ public class Booking {
 	 * @param dispatch
 	 * @param passenger
 	 */
-	public Booking(NuberDispatch dispatch, Passenger passenger)
+	public Booking(NuberDispatch dispatch, Passenger passenger) 
 	{
-		
+		this.dispatch = dispatch;
+		this.passenger = passenger;
+		bookingID = generateID();
+		bookingResult = new BookingResult(bookingID, passenger, null, 0);
+		this.dispatch.logEvent(this, "New Booking");
 	}
 	
 	/**
@@ -49,9 +59,26 @@ public class Booking {
 	 * 			information required in the BookingResult constructor.
 	 *
 	 * @return A BookingResult containing the final information about the booking 
+	 * @throws InterruptedException 
 	 */
-	public BookingResult call() {
-
+	public BookingResult call() throws InterruptedException {
+		dispatch.logEvent(this, "Assigning driver to booking...");
+		bookingResult.driver = dispatch.getDriver();
+		
+		if (bookingResult.driver != null) {
+			dispatch.logEvent(this, "Driver picking up passenger...");
+			bookingResult.driver.pickUpPassenger(passenger);
+			
+			dispatch.logEvent(this, "Picked up passenger. Heading to destination...");
+			bookingResult.driver.driveToDestination();
+			dispatch.logEvent(this, "Arrived. Drop off passenger.");
+			
+			bookingResult.tripDuration = bookingResult.driver.getDriverTripTravelTime();
+			
+			dispatch.addDriver(bookingResult.driver);
+		}
+		
+		return bookingResult;
 	}
 	
 	/***
@@ -67,6 +94,15 @@ public class Booking {
 	@Override
 	public String toString()
 	{
+		return String.format("ID %d : %s : %s", 
+				bookingResult.jobID, 
+				bookingResult.driver != null ? bookingResult.driver.name : "null", 
+				bookingResult.passenger != null ? bookingResult.passenger.name : "null");
+	}
+	
+	public static int generateID() {
+		currentID += 1;
+		return currentID;
 	}
 
 }

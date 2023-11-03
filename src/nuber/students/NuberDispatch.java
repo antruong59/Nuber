@@ -1,6 +1,7 @@
 package nuber.students;
 
 import java.util.HashMap;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 
@@ -19,6 +20,8 @@ public class NuberDispatch {
 	
 	private boolean logEvents = false;
 	private BlockingQueue<Driver> idleDriversQueue;
+	private HashMap<String, NuberRegion> regions;
+	private int awaitingBooking = 0;
 	
 	/**
 	 * Creates a new dispatch objects and instantiates the required regions and any other objects required.
@@ -30,8 +33,16 @@ public class NuberDispatch {
 	public NuberDispatch(HashMap<String, Integer> regionInfo, boolean logEvents)
 	{
 		this.logEvents = logEvents;
-//		idleDriversQueue = new 
+		regions = new HashMap<String, NuberRegion> ();
+		idleDriversQueue = new ArrayBlockingQueue<Driver>(MAX_DRIVERS);
+		System.out.println("\nNew Nuber Dispatch...");
 		
+		for (String i : regionInfo.keySet()) {
+			System.out.println("Creating Nuber region for " + i + "...");
+			regions.put(i, new NuberRegion(this, i, regionInfo.get(i)));
+		}
+		
+		System.out.println("Create total " + regions.size() + ((regions.size() > 1) ? " regions" : " region"));
 	}
 	
 	/**
@@ -48,6 +59,7 @@ public class NuberDispatch {
 		
 		try {
 			idleDriversQueue.put(newDriver); 
+			System.out.println("Add available driver " + newDriver.name);
 			return true;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -63,18 +75,29 @@ public class NuberDispatch {
 	 * 
 	 * @return A driver that has been removed from the queue
 	 */
-	public Driver getDriver()
+	public synchronized Driver getDriver()
 	{
-		// Retrieves and removes the head of driver  queue, 
-		// wait for available spot if needed
+		// Retrieves and removes the head of driver queue, 
+		// give up if no driver in queue
+		// wait for available spot if needed (queue empty)
 		
-		try {
-			return idleDriversQueue.take(); 
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		System.out.println("Searching driver...");
+		if (idleDriversQueue.isEmpty())
+			System.out.println("No driver available");
+	
+		else {
+			try {
+				System.out.println("Found driver");				
+				awaitingBooking --;
+				return idleDriversQueue.take();
+				
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		return null;
+		
+		return null; 
 	}
 
 	/**
@@ -89,7 +112,7 @@ public class NuberDispatch {
 		
 		if (!logEvents) return;
 		
-		System.out.println(booking + ": " + message);
+		System.out.println(booking + " : " + message);
 		
 	}
 
@@ -105,6 +128,21 @@ public class NuberDispatch {
 	 * @return returns a Future<BookingResult> object
 	 */
 	public Future<BookingResult> bookPassenger(Passenger passenger, String region) {
+		// Region not exist
+		if (regions.get(region) == null) {
+			System.out.println("Region doesn't exist");
+			return null;
+		}
+		
+		// Try to book with a registered region
+		Future<BookingResult> future = regions.get(region).bookPassenger(passenger);
+		if (future == null) {
+			System.out.println("Region has been shutdowned");
+
+		} else {
+			awaitingBooking ++;
+		}
+		return future;
 	}
 
 	/**
@@ -116,12 +154,16 @@ public class NuberDispatch {
 	 */
 	public int getBookingsAwaitingDriver()
 	{
+		return awaitingBooking;
 	}
 	
 	/**
 	 * Tells all regions to finish existing bookings already allocated, and stop accepting new bookings
 	 */
 	public void shutdown() {
+		for (NuberRegion region : regions.values()) {
+			region.shutdown();
+		}
 	}
 
 }

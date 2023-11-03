@@ -4,6 +4,7 @@ public class Driver extends Person {
 
 	private Passenger passenger;
 	private int driverTripTravelTime = 0;
+
 	
 	public Driver(String driverName, int maxSleep)
 	{
@@ -21,10 +22,9 @@ public class Driver extends Person {
 	public void pickUpPassenger(Passenger newPassenger) throws InterruptedException
 	{
 		passenger = newPassenger;
-		System.out.println("Passenger " + passenger.name + " was assigned to " + this.name);
 		int delay = delay(0, maxSleep);
 		driverTripTravelTime = delay;
-		System.out.println("Delay "+ delay + " --> Driver " + this.name + " picked up Passenger " + passenger.name);
+//		System.out.println("Waiting time : "+ delay);
 		
 	}
 
@@ -36,10 +36,9 @@ public class Driver extends Person {
 	 */
 	public void driveToDestination() throws InterruptedException {
 		int tripTravelTime = passenger.getTravelTime();
-		System.out.println(this.name + " + " + passenger.name + " travel time = " + tripTravelTime);
+//		System.out.println("Travel time : " + tripTravelTime);
 		Thread.sleep(tripTravelTime);
 		driverTripTravelTime += tripTravelTime;
-		System.out.println(this.name + " + " + passenger.name + " trip has arrived");
 	}
 	
 	private int delay(int minDelay, int maxDelay) {
@@ -49,11 +48,16 @@ public class Driver extends Person {
 			// thread to sleep for random milliseconds
 			actualDelay = (int)(Math.random() * range) + minDelay;
 			//System.out.println("Actual delay is "+actualDelay);
+//			System.out.println("Waiting...");
 			Thread.sleep(actualDelay);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return actualDelay;
+	}
+
+	public int getDriverTripTravelTime() {
+		return driverTripTravelTime;
 	}
 	
 }
