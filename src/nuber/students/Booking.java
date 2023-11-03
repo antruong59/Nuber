@@ -40,7 +40,7 @@ public class Booking implements Callable<BookingResult> {
 		this.dispatch = dispatch;
 		this.passenger = passenger;
 		bookingID = generateID();
-		bookingResult = new BookingResult(bookingID, passenger, null, 0);
+		bookingResult = new BookingResult(bookingID, null, null, 0);
 		this.dispatch.logEvent(this, "New Booking");
 	}
 	
@@ -62,10 +62,12 @@ public class Booking implements Callable<BookingResult> {
 	 * @throws InterruptedException 
 	 */
 	public BookingResult call() throws InterruptedException {
+		bookingResult.passenger = passenger;
 		dispatch.logEvent(this, "Assigning driver to booking...");
 		bookingResult.driver = dispatch.getDriver();
 		
 		if (bookingResult.driver != null) {
+			System.out.println(bookingResult.driver.name + " was assigned to pick up " + bookingResult.passenger.name);
 			dispatch.logEvent(this, "Driver picking up passenger...");
 			bookingResult.driver.pickUpPassenger(passenger);
 			

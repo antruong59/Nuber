@@ -21,7 +21,7 @@ public class NuberDispatch {
 	private boolean logEvents = false;
 	private BlockingQueue<Driver> idleDriversQueue;
 	private HashMap<String, NuberRegion> regions;
-	private int awaitingBooking = 0;
+	private int awaitingBooking;
 	
 	/**
 	 * Creates a new dispatch objects and instantiates the required regions and any other objects required.
@@ -35,6 +35,7 @@ public class NuberDispatch {
 		this.logEvents = logEvents;
 		regions = new HashMap<String, NuberRegion> ();
 		idleDriversQueue = new ArrayBlockingQueue<Driver>(MAX_DRIVERS);
+		awaitingBooking = 0;
 		System.out.println("\nNew Nuber Dispatch...");
 		
 		for (String i : regionInfo.keySet()) {
@@ -82,19 +83,24 @@ public class NuberDispatch {
 		// wait for available spot if needed (queue empty)
 		
 		System.out.println("Searching driver...");
-		if (idleDriversQueue.isEmpty())
-			System.out.println("No driver available");
-	
-		else {
-			try {
-				System.out.println("Found driver");				
+		
+		try {
+			while (idleDriversQueue.isEmpty() && awaitingBooking > 0)
+				wait(0, 10);
+				System.out.println("Wait till found driver...");
+			
+			Driver driver = idleDriversQueue.poll();
+			if (driver != null) {
+				System.out.println("Found driver");	
 				awaitingBooking --;
-				return idleDriversQueue.take();
-				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} else {
+				System.out.println("No driver available");
 			}
+			
+			return driver;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return null; 
