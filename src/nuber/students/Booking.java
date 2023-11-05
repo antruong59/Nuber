@@ -39,6 +39,7 @@ public class Booking implements Callable<BookingResult> {
 	{
 		this.dispatch = dispatch;
 		this.passenger = passenger;
+		// Generate new ID for each new booking
 		bookingID = generateID();
 		bookingResult = new BookingResult(bookingID, null, null, 0);
 		this.dispatch.logEvent(this, "New Booking");
@@ -66,6 +67,7 @@ public class Booking implements Callable<BookingResult> {
 		dispatch.logEvent(this, "Assigning driver to booking...");
 		bookingResult.driver = dispatch.getDriver();
 		
+		// Only proceed if driver is found
 		if (bookingResult.driver != null) {
 			System.out.println(bookingResult.driver.name + " was assigned to pick up " + bookingResult.passenger.name);
 			dispatch.logEvent(this, "Driver picking up passenger...");

@@ -34,10 +34,13 @@ public class NuberDispatch {
 	{
 		this.logEvents = logEvents;
 		regions = new HashMap<String, NuberRegion> ();
+		
+		// Array of block representing idle driver, set with max number of drivers
 		idleDriversQueue = new ArrayBlockingQueue<Driver>(MAX_DRIVERS);
 		awaitingBooking = 0;
 		System.out.println("\nNew Nuber Dispatch...");
 		
+		// Create new region to dispatch
 		for (String i : regionInfo.keySet()) {
 			System.out.println("Creating Nuber region for " + i + "...");
 			regions.put(i, new NuberRegion(this, i, regionInfo.get(i)));
